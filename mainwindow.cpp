@@ -46,9 +46,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::add()
 {
-    QString text = QInputDialog::getText(this, "Input text", "Some text");
+    // QString text = QInputDialog::getText(this, "Input text", "Some text");
     TreeModel *model = qobject_cast<TreeModel*>(ui->treeView->model());
-    model->add(text, ui->treeView->currentIndex());
+    model->add(QStringList{"New row"}, ui->treeView->currentIndex());
 }
 
 void MainWindow::remove()

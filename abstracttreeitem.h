@@ -23,25 +23,34 @@
 
 #pragma once
 
-#include <QAbstractItemModel>
+#include <QList>
+#include <QString>
 
-class AbstractTreeItem;
-
-class AbstractTreeModel : public QAbstractItemModel
+class AbstractTreeItem
 {
-    Q_OBJECT
-
 public:
-    explicit AbstractTreeModel(AbstractTreeItem *root, QObject *parent = 0);
-    ~AbstractTreeModel() override;
+    explicit AbstractTreeItem(AbstractTreeItem *parent = 0);
+    virtual ~AbstractTreeItem();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex & index) const override;
-    int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+    void setRow(int row);
+    int row() const;
 
-protected:
-    AbstractTreeItem *root() const;
+    void setParent(AbstractTreeItem *newParent);
+    AbstractTreeItem *parent() const;
+
+    void insertChild(int row, AbstractTreeItem *child);
+    void appendChild(AbstractTreeItem *child);
+    void removeChild(AbstractTreeItem *child);
+
+    AbstractTreeItem *child(int row) const;
+    int childCount() const;
+    QList<AbstractTreeItem*> children() const;
+
+    virtual AbstractTreeItem *clone() const = 0;
+    void dump(int indent = 0) const;
+    virtual QString toString() const = 0;
 
 private:
-    AbstractTreeItem *_root;
+    AbstractTreeItem *_parent;
+    QList<AbstractTreeItem*> _children;
 };

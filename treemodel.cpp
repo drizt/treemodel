@@ -27,9 +27,9 @@
 
 #include <QDebug>
 
-TreeItem::TreeItem(const QString &name, AbstractTreeItem *parent)
+TreeItem::TreeItem(const QStringList &values, AbstractTreeItem *parent)
     : AbstractTreeItem(parent)
-    , _name(name)
+    , _values(values)
 {
 }
 
@@ -37,15 +37,23 @@ TreeItem::~TreeItem()
 {
 }
 
-QString TreeItem::name() const
+void TreeItem::setValue(int column, const QString &name)
 {
-    return _name;
+    while (column >= _values.size())
+        _values << "";
+
+    _values[column] = name;
+}
+
+QString TreeItem::value(int column) const
+{
+    return column < _values.size() ? _values.at(column) : "";
 }
 
 TreeItem *TreeItem::clone() const
 {
     TreeItem *newItem = new TreeItem;
-    newItem->_name = _name;
+    newItem->_values = _values;
 
     foreach (AbstractTreeItem *child, children()) {
         newItem->appendChild(child->clone());
@@ -55,24 +63,19 @@ TreeItem *TreeItem::clone() const
 
 QString TreeItem::toString() const
 {
-    return "name " + _name;
+    return _values.join(" ");
 }
 
 TreeModel::TreeModel(QObject *parent)
     : AbstractTreeModel(new TreeItem, parent)
 {
-    new TreeItem("test1", root());
-    TreeItem *node = new TreeItem("test2", root());
-    node = new TreeItem("test3", node);
-    new TreeItem("test4", node);
-    root()->dump();
 }
 
 TreeModel::~TreeModel()
 {
 }
 
-void TreeModel::add(const QString &name, const QModelIndex &index)
+void TreeModel::add(const QStringList &values, const QModelIndex &index)
 {
     beginInsertRows(index, rowCount(index), rowCount(index));
     TreeItem *item;
@@ -81,7 +84,7 @@ void TreeModel::add(const QString &name, const QModelIndex &index)
     else
         item = static_cast<TreeItem*>(root());
 
-    new TreeItem(name, item);
+    new TreeItem(values, item);
     endInsertRows();
 }
 
@@ -127,7 +130,7 @@ void TreeModel::down(const QModelIndex &index)
 int TreeModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return 1;
+    return 3;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const
@@ -137,10 +140,45 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         TreeItem *node = static_cast<TreeItem*>(index.internalPointer());
-        if (node) {
-            return node->name();
-        }
+        return node->value(index.column());
     }
 
     return QVariant();
+}
+
+bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+        return false;
+
+    if (role != Qt::EditRole && role != Qt::CheckStateRole && role < Qt::UserRole)
+        return false;
+
+    if (role == Qt::EditRole) {
+        TreeItem *node = static_cast<TreeItem*>(index.internalPointer());
+        node->setValue(index.column(), value.toString());
+        emit dataChanged(index, index);
+        return true;
+    }
+
+    return false;
+}
+
+QVariant TreeModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole) {
+        return QString("Column %1").arg(section);
+    }
+    else {
+        return AbstractTreeModel::headerData(section, orientation, role);
+    }
+}
+
+Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return AbstractTreeModel::flags(index);
+
+    Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+    return f;
 }

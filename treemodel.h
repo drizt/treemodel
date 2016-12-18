@@ -25,22 +25,25 @@
 
 #pragma once
 
+#include "abstracttreeitem.h"
 #include "abstracttreemodel.h"
-#include <QString>
+
+#include <QStringList>
 
 class TreeItem : public AbstractTreeItem
 {
 public:
-    explicit TreeItem(const QString &name = "", AbstractTreeItem *parent = 0);
+    explicit TreeItem(const QStringList &values = QStringList(), AbstractTreeItem *parent = 0);
     ~TreeItem();
 
-    QString name() const;
+    void setValue(int column, const QString &name);
+    QString value(int column) const;
 
     TreeItem *clone() const;
     QString toString() const;
 
 private:
-    QString _name;
+    QStringList _values;
 };
 
 class TreeModel : public AbstractTreeModel
@@ -51,11 +54,14 @@ public:
     explicit TreeModel(QObject *parent = 0);
     ~TreeModel();
 
-    void add(const QString &name, const QModelIndex &index);
+    void add(const QStringList &values, const QModelIndex &index);
     void remove(const QModelIndex &index);
     void up(const QModelIndex &index);
     void down(const QModelIndex &index);
 
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
 };

@@ -16,7 +16,14 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QTreeView" name="treeView"/>
+     <widget class="QTreeView" name="treeView">
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -71,7 +78,7 @@
      <x>0</x>
      <y>0</y>
      <width>509</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
