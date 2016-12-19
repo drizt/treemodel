@@ -27,16 +27,28 @@
 #include "ui_mainwindow.h"
 #include "treemodel.h"
 
+#include <QAction>
 #include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , _copyedItem(nullptr)
 {
     ui->setupUi(this);
 
     TreeModel *model = new TreeModel(this);
     ui->treeView->setModel(model);
+
+    QAction *action = new QAction("Copy", this);
+    action->setShortcut(QKeySequence::Copy);
+    connect(action, SIGNAL(triggered(bool)), SLOT(copyItem()));
+    ui->treeView->addAction(action);
+
+    action = new QAction("Paste", this);
+    action->setShortcut(QKeySequence::Paste);
+    connect(action, SIGNAL(triggered(bool)), SLOT(pasteItem()));
+    ui->treeView->addAction(action);
 }
 
 MainWindow::~MainWindow()
@@ -67,4 +79,24 @@ void MainWindow::down()
 {
     TreeModel *model = qobject_cast<TreeModel*>(ui->treeView->model());
     model->down(ui->treeView->currentIndex());
+}
+
+void MainWindow::copyItem()
+{
+    QModelIndex index = ui->treeView->currentIndex();
+    if (!index.isValid())
+        return;
+
+    _copyedItem = static_cast<TreeItem*>(index.internalPointer());
+
+}
+
+void MainWindow::pasteItem()
+{
+    if (!_copyedItem)
+        return;
+
+    QModelIndex parent = ui->treeView->currentIndex();
+    TreeModel *model = qobject_cast<TreeModel*>(ui->treeView->model());
+    model->add(_copyedItem->values(), parent);
 }

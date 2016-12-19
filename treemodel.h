@@ -39,6 +39,9 @@ public:
     void setValue(int column, const QString &name);
     QString value(int column) const;
 
+    void setValues(const QStringList &values);
+    QStringList values() const;
+
     TreeItem *clone() const;
     QString toString() const;
 

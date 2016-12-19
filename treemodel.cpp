@@ -50,6 +50,16 @@ QString TreeItem::value(int column) const
     return column < _values.size() ? _values.at(column) : "";
 }
 
+void TreeItem::setValues(const QStringList &values)
+{
+    _values = values;
+}
+
+QStringList TreeItem::values() const
+{
+    return _values;
+}
+
 TreeItem *TreeItem::clone() const
 {
     TreeItem *newItem = new TreeItem;
@@ -138,7 +148,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
         TreeItem *node = static_cast<TreeItem*>(index.internalPointer());
         return node->value(index.column());
     }

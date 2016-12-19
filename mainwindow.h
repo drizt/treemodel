@@ -27,6 +27,8 @@
 
 #include <QMainWindow>
 
+class TreeItem;
+
 namespace Ui { class MainWindow; }
 
 class MainWindow : public QMainWindow
@@ -43,6 +45,10 @@ public slots:
     void up();
     void down();
 
+    void copyItem();
+    void pasteItem();
+
 private:
     Ui::MainWindow *ui;
+    TreeItem *_copyedItem;
 };
